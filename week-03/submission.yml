@@ -1,0 +1,49 @@
+# week-03/submission.yml — your declaration for this lab.
+#
+# Facts only. Every explanation goes in lab-report.md; nothing here repeats prose.
+# Fill every value. Check it before you push:
+#
+#     python tests/validate_submission.py
+#
+# The validator checks shape, never quality. A green run is the floor, not the grade.
+# If you cannot run Python, fill the file by hand against the comments — a malformed
+# file costs you nothing if the content is there.
+
+schema: 1
+week: "03"
+
+student:
+  name: "Dias"
+  student_id: "24B031886"  
+  github: "Dias-06"        
+
+assistant:
+  tool: "ChatGPT"
+  model: "GPT-4o"
+
+counts:
+  user_stories: 7
+  acceptance_criteria_sets: 3
+
+checker:
+  pass: 23
+  fail: 0
+  error: 0
+  commit: "7241fe9"  
+
+assumptions:
+  overlap_touching_bookings: "allowed"
+  exactly_two_hours: "allowed"
+
+traceability:
+  use_cases_not_covered: []
+  stories_not_traced: ["US-07"]
+
+review_findings:
+  - "UC-06 Send confirmation had no direct actor trigger and was updated to an include relationship from US-02 and US-03."
+  - "US-05 original AI draft included out-of-scope room inventory management, which was corrected to UC-04 block/unblock room."
+  - "AC-05 was explicitly written to resolve boundary ambiguity for bookings touching exactly at 14:00 under R3."
+
+honesty:
+  can_explain_everything_submitted: "yes"
+  ai_usage_disclosed: "yes"
