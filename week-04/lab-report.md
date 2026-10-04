@@ -102,14 +102,16 @@ One row per association in your **revised** class diagram.
 
 ## 5. Task 3 — behaviour diagram review
 
-**Option chosen and why:** <3A sequence / 3B activity — one sentence on why>
+**Option chosen and why:** 3A sequence diagram was chosen because it clearly illustrates time-ordered interactions, validation checks, and alternative flows between design components.
 
-**Design components added beyond the domain model:** <name each one, e.g. `BookingService` —
-what it does in one line; write "none" for an activity diagram>
+**Design components added beyond the domain model:**
+- `BookingService`: Coordinates business logic, checks validation rules (R1, R2, R3), and manages booking creation.
+- `BookingRepository`: Handles data persistence and queries room and booking states from storage.
 
 | # | Element | Problem | Rule or story | Fix |
 | --- | --- | --- | --- | --- |
-| 1 | <element> | <problem> | <rule or story> | <fix> |
+| 1 | Guard brackets in alt block | The AI added square brackets inside the `alt` condition labels (e.g. `alt [valid]`), which PlantUML parses improperly. | PlantUML convention / SQ2 | Removed square brackets from alt conditions to follow PlantUML sequence syntax conventions. |
+| 2 | Validation order | The AI draft attempted to save the booking before completing all validation checks. | SQ3 / SQ4 | Reordered messages so that room availability and duration checks complete before calling saveBooking. |
 
 ---
 
