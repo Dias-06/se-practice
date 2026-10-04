@@ -10,13 +10,13 @@
 
 | Field | Value |
 | --- | --- |
-| Name | <your name> |
-| Group | <your group> |
-| AI assistant | <e.g. Claude, ChatGPT, Gemini, DeepSeek, Grok> |
-| Exact model | <the exact model name with its version, e.g. claude-sonnet-4-5> |
-| Renderer | <PlantUML web server / VS Code extension / IntelliJ plugin / local jar> |
-| Behaviour diagram | <sequence / activity / both> |
-| Stories used | <my week-03 stories, revised / the reference set from README §3> |
+| Name | Dias |
+| Group | Monday 16:00-19:00 |
+| AI assistant | ChatGPT|
+| Exact model | GPT-4o |
+| Renderer | PlantUML web server |
+| Behaviour diagram | sequence |
+| Stories used | my week-03 stories, revised |
 
 ---
 
@@ -28,31 +28,31 @@ AI's first replies are saved as files in `models/original/` — do not paste the
 ### 2.1 Task 1 — use-case prompt
 
 ```text
-<paste>
+Using the supplied scenario and approved stories, generate PlantUML for a use-case diagram. Include Student and Administrator outside a named system boundary. Model their goals, show justified associations, and list assumptions. Use include or extend only with a clear reason.
 ```
 
 ### 2.2 Task 2 — class prompt
 
 ```text
-<paste>
+Create a UML domain class diagram in PlantUML for Smart Campus. Start with Student, Room, and Booking. Add attributes, appropriate operations, and association multiplicities. Add other classes only when requirements justify them. Explain each relationship and list assumptions. Avoid unjustified inheritance or composition.
 ```
 
 ### 2.3 Task 3 — behaviour prompt (3A sequence or 3B activity)
 
 ```text
-<paste>
+Generate PlantUML for Book room. Use Student, BookingService, and BookingRepository lifelines. Validate the supplied rules, then attempt the reservation. Show a successful confirmation and an unavailable-room alternative using alt. Label messages and replies. Explain new design components and all assumptions.
 ```
 
 ### 2.4 Focused correction prompts (if you sent any)
 
 ```text
-<paste, or write "none">
+none
 ```
 
 ### 2.5 Critique prompt
 
 ```text
-<paste>
+Compare my diagrams with the requirements. Identify missing rules, inconsistent names, and unjustified elements. Cite each issue and propose a specific correction.
 ```
 
 ---
@@ -117,42 +117,43 @@ One row per association in your **revised** class diagram.
 
 ## 6. AI critique
 
-Run the critique prompt once, on all your revised diagrams together. At least **three** rows. A
-critique is another claim to evaluate, not a verdict: reject what is wrong and say why.
+Run the critique prompt once, on all your revised diagrams together. At least **three** rows. A critique is another claim to evaluate, not a verdict: reject what is wrong and say why.
 
 | # | Issue the AI raised | Element it cited | Verdict | Why |
 | --- | --- | --- | --- | --- |
-| 1 | <issue> | <element> | <accept / reject> | <your reason> |
-| 2 | <issue> | <element> | <accept / reject> | <your reason> |
-| 3 | <issue> | <element> | <accept / reject> | <your reason> |
+| 1 | Claimed BookingService missing error output details | `BookingService` | reject | The sequence diagram clearly returns rejectBooking with an error message in the else branch. |
+| 2 | Suggested creating separate BlockedRoom class | `Room` class | reject | Adding a separate class is redundant; a boolean isBlocked attribute in Room is sufficient for R3. |
+| 3 | Claimed missing confirmation relationship | `use-case.puml` | reject | UC-06 Send confirmation is properly included in UC-02 and UC-03 with ' why: comments. |
 
 ---
 
 ## 7. Consistency table
 
-One row for each of **R1–R4**, then one row for **every use case in your revised use-case
-diagram**, spelled exactly as in the diagram, with the story ID it traces to.
+One row for each of **R1–R4**, then one row for **every use case in your revised use-case diagram**, spelled exactly as in the diagram, with the story ID it traces to.
 
 | Requirement / story | Use case | Classes | Behaviour element |
 | --- | --- | --- | --- |
-| R1 | <use case> | <classes and attributes> | <message, guard or decision> |
-| R2 | <use case> | <classes, note> | <message, guard or decision> |
-| R3 | <use case> | <classes and attributes> | <message, guard or decision> |
-| R4 | <use case> | <classes> | <message or action> |
-| <US-01> | <Book room> | <Student, Booking, Room> | <message or action> |
-
+| R1 | Book room | Booking | Check duration <= 2 hours guard |
+| R2 | Book room | Booking | checkOverlap message and note |
+| R3 | Block or unblock room | Room, Booking | checkRoomBlocked message and isBlocked flag |
+| R4 | Book room | Booking, Student | confirmBooking message and UC-06 include |
+| US-01 | View availability | Room | viewAvailability message |
+| US-02 | Book room | Student, Room, Booking | requestBooking message flow |
+| US-03 | Cancel booking | Student, Booking | cancelBooking message flow |
+| US-04 | Block or unblock room | Administrator, Room | blockRoom / unblockRoom operations |
+| US-05 | Review usage | Administrator, Room | reviewUsage operation |
+| US-06 | Send confirmation | Student, Booking | confirmBooking message |
 ---
 
 ## 8. Change log
 
-At least **three** rows, and at least one for each required diagram (use case, class, your
-behaviour diagram). "Before" is what the AI produced; "After" is what you submitted.
+At least **three** rows, and at least one for each required diagram (use case, class, your behaviour diagram). "Before" is what the AI produced; "After" is what you submitted.
 
 | # | Diagram | Before (AI's original) | After (your revision) | Reason |
 | --- | --- | --- | --- | --- |
-| 1 | <use case> | <before> | <after> | <rule, story or notation reason> |
-| 2 | <class> | <before> | <after> | <reason> |
-| 3 | <sequence / activity> | <before> | <after> | <reason> |
+| 1 | use-case | Included Check booking constraints as a use case | Removed internal constraint use case and added ' why: comments above includes | UC8 requirement and domain modeling principles |
+| 2 | class | Omitted R2 note on Booking class | Added explicit note attached to Booking describing R2 and R1 constraints | CL8 requirement; multiplicities cannot show time overlap |
+| 3 | sequence | Used square brackets in alt guards like `alt [valid]` | Removed brackets to `alt valid` and ordered validation before creation | PlantUML syntax conventions and SQ2 / SQ3 checks |
 
 ---
 
@@ -162,17 +163,56 @@ Paste the complete output of `python tests/check_models.py`, then explain **ever
 keeping**. The same IDs go in `submission.yml` under `checker.kept_fails`. A FAIL you report and explain costs you nothing. One you hide costs the whole criterion.
 
 ```text
-<paste the full output>
+Week 04 structural check - shape only, never quality
+
+UC1  PASS  Student and Administrator declared
+UC2  PASS  named system boundary: "Smart Campus study room booking"
+UC3  PASS  all actors declared outside the boundary
+UC4  PASS  all scenario goals present (6 use cases)
+UC5  PASS  no actor is associated with a confirmation use case
+UC6  PASS  actor responsibilities match the scenario
+UC7  PASS  use cases are goals, not screens or components
+UC8  PASS  every include / extend / generalization carries a ' why: comment (or there are none)
+UC9  PASS  revised diagram differs from the AI's original
+CL1  PASS  Student, Room and Booking present
+CL2  PASS  Booking is associated with Student and with Room
+CL3  PASS  every association has multiplicities at both ends
+CL4  PASS  1 student / 1 room per booking, 0..* bookings per student and per room
+CL5  PASS  every inheritance / composition / aggregation carries a ' why: comment (or there are none)
+CL6  PASS  only domain concepts in the class diagram
+CL7  PASS  attributes needed by R1-R3 are present
+CL8  PASS  a note states R2 (no overlapping active bookings)
+SQ1  PASS  Student, BookingService and BookingRepository lifelines present
+SQ2  PASS  alt block with a guard on every branch (2 branches)
+SQ3  PASS  validation happens before creation
+SQ4  PASS  nothing is saved on a failure branch
+SQ5  PASS  every message is labelled
+SQ6  PASS  R1 (time range) is visible - checked or stated as a precondition
+SQ7  PASS  R3 (blocked room) is visible
+FI1  PASS  the AI's original output is kept for every diagram
+FI2  PASS  a rendered image for every diagram
+LR1  PASS  §1 setup filled (tool and model recorded)
+LR2  PASS  5 prompts pasted in §2
+LR3  PASS  2 use-case findings in §3
+LR4  PASS  §4 relationships read both ways, 2 assumption(s) declared
+LR5  PASS  2 behaviour-diagram findings in §5
+LR6  PASS  3 critique issues with a verdict
+LR7  PASS  3 change-log rows covering all three diagrams
+CS1  PASS  6 approved stories
+CS2  PASS  §7 traces R1-R4 into the diagrams
+CS3  PASS  every use case traces to an approved story
+CS4  PASS  every lifeline is a domain class or an explained design component
+
+SUMMARY pass=37 fail=0 error=0
+A FAIL you report and explain in lab-report.md §9 costs you nothing. One you hide costs the criterion.
 ```
 
-**FAILs I am keeping, and why:** <one line per check ID, or "none">
+**FAILs I am keeping, and why:** "none"
 
 ---
 
 ## 10. Conclusion (120–180 words)
 
-<Which diagram did the AI get most wrong, and what exactly was wrong? Which error would have
-reached the code if nobody had reviewed it? What did the critique find that you missed — and what
-did it claim that was false? Be specific: "the AI got the multiplicities wrong" is worth nothing;
-"the AI put 1..* on the Booking end, which says every room must already have a booking" is worth
-everything.>
+The AI got the class diagram most wrong by omitting explicit business rule constraints and misusing PlantUML syntax conventions. Specifically, it omitted the required note explaining rule R2 on the Booking class, assuming multiplicities alone could represent time overlap constraints. If nobody had reviewed it, these missing validation notes and improper alt guard syntax in the sequence diagram would have led to race conditions and syntax rendering errors in downstream development.
+
+The AI critique attempted to suggest adding redundant classes like a separate BlockedRoom entity, which was false because a simple boolean attribute on the Room domain concept satisfies rule R3. However, the AI was effective at drafting initial lifeline interactions for the sequence diagram, which provided a solid foundation to refine into a fully validated sequence flow.
