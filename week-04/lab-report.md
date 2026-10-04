@@ -59,15 +59,14 @@ AI's first replies are saved as files in `models/original/` — do not paste the
 
 ## 3. Task 1 — use-case review
 
-**Assumptions the AI listed:** <one line each, or "the AI listed none" — that is a finding too>
+**Assumptions the AI listed:** The AI assumed that Student and Administrator are the only external actors.
 
-At least **two** findings. A finding names the element, the problem and the rule or story that
-proves it is a problem.
+At least **two** findings. A finding names the element, the problem and the rule or story that proves it is a problem.
 
 | # | Element | Problem | Rule or story | Fix |
 | --- | --- | --- | --- | --- |
-| 1 | <e.g. Student → Send confirmation> | <what is wrong> | <R4 / US-01 / scenario sentence> | <what you changed> |
-| 2 | <element> | <problem> | <rule or story> | <fix> |
+| 1 | Student -> Send confirmation | The AI linked Student directly to Send confirmation. A student does not trigger confirmation manually; it is automated. | R4 / US-06 | Removed direct link and converted it to an include relationship from Book room and Cancel booking. |
+| 2 | Include relationship | The AI did not add the required comment above the include arrows. | PlantUML convention | Added ' why: comment directly above every include relationship. |
 
 ---
 
@@ -79,24 +78,25 @@ One row per association in your **revised** class diagram.
 
 | Association | Read left → right | Read right → left | Multiplicities |
 | --- | --- | --- | --- |
-| <Student — Booking> | <one student makes 0..* bookings> | <each booking belongs to exactly 1 student> | <1 / 0..*> |
-| <Room — Booking> | <...> | <...> | <...> |
+| Student — Booking | One student can make zero or many bookings | Each booking belongs to exactly one student | 1 / 0..* |
+| Room — Booking | One room can have zero or many bookings | Each booking belongs to exactly one room | 1 / 0..* |
 
 ### 4.2 Constraints the multiplicities cannot show
 
-- R2: <how your diagram states it — which note, on which class>
-- <any other rule that is not visible in multiplicities>
+- R2: Active bookings for the same room cannot overlap in time. This is stated in a note on the Booking class because multiplicities cannot express time constraints.
+- R1: A booking start time must be in the future and last at most 2 hours. This is also specified inside the Booking class note.
 
 ### 4.3 Assumptions
 
-- A1: <an assumption you had to make — e.g. what happens to existing bookings when a room is blocked>
-- <A2 ...>
+- A1: When a room is blocked by an administrator, existing future bookings are kept unless manually managed.
+- A2: Touching bookings (where one ends exactly when another begins) do not count as overlapping under R2.
 
 ### 4.4 Findings
 
 | # | Element | Problem | Rule or story | Fix |
 | --- | --- | --- | --- | --- |
-| 1 | <element> | <problem> | <rule or story> | <fix> |
+| 1 | R2 Constraint Note | The AI omitted the note explaining rule R2 on the Booking class. | R2 / CL8 | Added a explicit note attached to Booking explaining that active bookings cannot overlap. |
+| 2 | Booking Attributes | The AI missed start/end time attributes necessary for duration validation. | R1 / CL7 | Added startTime and endTime attributes to the Booking class. |
 
 ---
 
