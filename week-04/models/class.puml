@@ -1,0 +1,39 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class Student {
+  - studentId : String
+  - name : String
+  - email : String
+  + viewAvailability()
+  + makeBooking()
+  + cancelBooking()
+}
+
+class Room {
+  - roomId : String
+  - roomName : String
+  - capacity : int
+  - isBlocked : boolean
+  + blockRoom()
+  + unblockRoom()
+}
+
+class Booking {
+  - bookingId : String
+  - startTime : DateTime
+  - endTime : DateTime
+  - status : String
+  + createBooking()
+  + cancel()
+}
+
+Student "1" -- "0..*" Booking : makes >
+Room "1" -- "0..*" Booking : has >
+
+note bottom of Booking
+  R2: Active bookings for the same room cannot overlap.
+  R1: Duration must be > 0 and <= 2 hours in the future.
+end note
+
+@enduml

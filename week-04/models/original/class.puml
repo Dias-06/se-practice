@@ -1,0 +1,43 @@
+@startuml
+hide methods
+skinparam classAttributeIconSize 0
+
+class Student {
+    -studentId : String
+    -name : String
+    -email : String
+    --
+    +bookRoom(room : Room, start : DateTime, duration : Duration) : Booking
+    +cancelBooking(booking : Booking) : void
+}
+
+class Room {
+    -roomId : String
+    -name : String
+    -isBlocked : Boolean
+    --
+    +isAvailable(start : DateTime, duration : Duration) : Boolean
+    +block() : void
+    +unblock() : void
+}
+
+class Booking {
+    -bookingId : String
+    -startTime : DateTime
+    -duration : Duration
+    -status : BookingStatus
+    --
+    +cancel() : void
+    +isActive() : Boolean
+    +overlaps(other : Booking) : Boolean
+}
+
+enum BookingStatus {
+    ACTIVE
+    CANCELLED
+}
+
+Student "1" -- "0..*" Booking : makes
+Room "1" -- "0..*" Booking : has
+
+@enduml

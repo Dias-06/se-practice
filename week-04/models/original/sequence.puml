@@ -1,0 +1,26 @@
+@startuml
+title Book room — US-01
+
+actor Student
+participant BookingService
+participant BookingRepository
+
+Student -> BookingService : bookRoom(roomId, startTime, duration)
+activate BookingService
+
+BookingService -> BookingService : Validate R1\nfuture start; 0 < duration <= 2h
+BookingService -> BookingRepository : checkRoomAvailable(roomId, startTime, duration)
+BookingRepository --> BookingService : availability result
+
+alt Room unavailable
+    BookingService --> Student : booking rejected\nroom unavailable (R2 or R3)
+else Room available
+    BookingService -> BookingRepository : saveBooking(booking)
+    BookingRepository --> BookingService : booking saved
+
+    BookingService --> Student : booking confirmation (R4)
+end
+
+deactivate BookingService
+
+@enduml
