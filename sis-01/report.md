@@ -78,9 +78,9 @@
 
 ### B1 — Draft (Prompt A)
 
-- **Tool:** (write here)
-- **Model:** (write here)
-- **Date:** (write here)
+- **Tool:** (ChatGpt)
+- **Model:** (Gpt-4o)
+- **Date:** (08-10-2026)
 - **Purpose:** contextual draft
 
 <!-- Model: the exact model with its version, as the tool shows it (e.g. "GPT-5 Thinking",
@@ -90,13 +90,30 @@
 **Prompt:**
 
 ```text
-(paste here)
+Act as a software engineering tutor. Help me analyze topic 1.3 How do software engineering practices reduce total system costs over its lifecycle compared to fast, low-quality code generation? for a first-year-level university assignment.
+
+My scenario is Users: Students and campus cafeteria staff ordering and managing meal deliveries. Problem: High long-term maintenance expenses and unexpected system downtime caused by hasty development without proper engineering standards. Constraints: The system must process order placement within 2 seconds and operate under a strict initial budget of 5000 dollars. Risk: System failure during peak lunch hours causing lost orders, financial conflict, and reputational damage for campus cafeterias. My initial ideas are 1. Initial development is only a small fraction of total software lifecycle cost. 2. Automated testing and clear architecture reduce expensive bug fixes in production. 3. AI tools speed up code generation but can introduce subtle architectural debt. 4. Maintenance costs grow rapidly if code lacks clear documentation and modularity. 5. Investing in requirements analysis prevents building features that users do not need. Draft a 400–500 word explanation using these details.
+
+Separate facts from assumptions. Explain trade-offs and identify claims I should verify. Do not invent quotations, references or page numbers.
 ```
 
 **Response:**
 
 ```text
-(paste here)
+Software engineering practices can reduce the total cost of a software system over its lifecycle, even when they require more time and money during initial development. In the campus cafeteria system, the main trade-off is between meeting the strict initial budget of $5,000 and reducing the risk of expensive maintenance, downtime, and failures later.
+
+**Fact:** Software development does not end when the first version is released. A system normally requires ongoing maintenance, bug fixing, changes, testing, and improvements throughout its lifecycle. Therefore, focusing only on the initial development cost can ignore significant future costs. In this scenario, spending the entire budget on fast code generation without sufficient engineering practices could create higher maintenance costs later.
+
+Automated testing and a clear architecture can help reduce these risks. Tests can detect regressions when developers modify existing functionality, while modular architecture can make individual components easier to understand and change. For example, separating order processing, payment-related logic, and cafeteria management could make it easier to fix one component without accidentally breaking another. This is particularly important because a failure during peak lunch hours could cause lost orders, financial disputes, and reputational damage.
+
+AI coding tools create another trade-off. **Fact:** AI tools can assist developers with code generation and can increase development speed in some situations. However, **assumption:** faster code generation will necessarily produce lower-quality architecture in this particular project. This claim should be verified through evidence or by evaluating the generated code. AI-generated code may still require human review, testing, and architectural decisions. Therefore, the project should measure whether AI actually reduces total development effort rather than assuming that more generated code means lower cost.
+
+Documentation and modularity are also important for maintenance. **Fact:** Poorly structured software can become more difficult to understand and modify. However, the statement that maintenance costs “grow rapidly” should be treated as a claim to verify rather than a guaranteed result. For this system, maintaining understandable modules and useful documentation could reduce the time required for future developers to diagnose and modify the system.
+
+Finally, requirements analysis can prevent unnecessary development. Understanding what students and cafeteria staff actually need can reduce the risk of spending the limited $5,000 budget on features that provide little value. The trade-off is that requirements analysis consumes time before implementation, but this may be cheaper than developing and later removing unwanted functionality.
+
+Overall, the goal should not be to maximize initial development speed. The better objective is to minimize **total lifecycle cost** while satisfying the 2-second order-processing requirement and the $5,000 initial budget. Engineering practices require additional upfront effort, but they can reduce the probability and cost of defects, unnecessary features, and difficult maintenance.
+
 ```
 
 ### B2 — Critique (Prompt B)
