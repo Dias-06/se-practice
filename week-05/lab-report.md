@@ -1,8 +1,8 @@
 # Week 05 — Lab report
 
-**Name:**
-**Group:**
-**Date:**
+**Name: Dias**
+**Group: **
+**Date: 11.10.2026**
 
 Fill in every section. **Do not delete, rename or renumber the headings** — the checker and the
 grader find your answers by them. Add rows to any table; never remove its header.
@@ -13,11 +13,11 @@ grader find your answers by them. Add rows to any table; never remove its header
 
 | | |
 | --- | --- |
-| Assistant (tool) | |
-| **Exact** model name | |
-| Language and version | |
+| Assistant (tool) | ChatGpt |
+| **Exact** model name | GPT-4o |
+| Language and version | Python 3.14.3 |
 | Path | A / B |
-| My Week 04 declaration for touching bookings | allowed / not-allowed / did not submit |
+| My Week 04 declaration for touching bookings | allowed |
 
 <!-- If your Week 04 model said touching bookings are NOT allowed: AC4 now says they are.
      One sentence here on what that changes in your Week 04 diagrams. This is a finding, not a penalty. -->
@@ -29,7 +29,59 @@ grader find your answers by them. Add rows to any table; never remove its header
 **The assistant's plan, pasted unedited:**
 
 ```text
-(paste here)
+Implementation plan for can_book
+1. Checks in order
+1. Validate the time interval (AC1).
+- Require 0 <= start < end <= 1440.
+- Require start > now, not start >= now.
+- Return False if any condition fails.
+2. Check the duration (AC2).
+- Calculate end - start.
+- Require the duration to be at most 120 minutes.
+- Return False if it exceeds 120 minutes.
+3. Check room availability status (AC3).
+- If blocked is True, return False.
+4. Check existing bookings for overlap (AC4).
+- Compare the requested interval against every interval in existing.
+- Treat intervals as half-open: the start is included, and the end is excluded.
+- Return False if any overlap exists; touching endpoints are allowed.
+5. Return the final decision (AC5).
+- Return True only if all previous checks pass.
+- Do not modify existing or any other input.
+2. Assumptions
+- All time values represent integer minutes after midnight on the same date.
+- now is valid, and blocked is Boolean, as specified in the contract.
+- All intervals in existing are valid and represent active bookings for the selected room.
+- The function evaluates eligibility only; saving a booking and confirming it are outside its scope.
+- Invalid start or end values must result in False. No additional validation of now, blocked, or existing is necessary under the stated preconditions.
+3. Boundary cases to test
+Case	Example	Expected result	Reason
+Start at midnight	start=0, end=60, now=1439	False	Start is not in the future
+Start equals now	start=600, end=660, now=600	False	AC1 requires start > now
+Start one minute after now	start=601, end=660, now=600	True if otherwise valid	Smallest valid future start
+End at midnight boundary	start=1380, end=1440, now=600	True if otherwise valid	1440 is permitted
+End exceeds boundary	start=1380, end=1441, now=600	False	Violates AC1
+Zero duration	start=600, end=600, now=500	False	Requires start < end
+Reversed interval	start=660, end=600, now=500	False	Invalid interval
+Maximum duration	start=600, end=720, now=500	True if otherwise valid	Exactly 120 minutes
+Excessive duration	start=600, end=721, now=500	False	121 minutes
+Room blocked	Valid future interval, blocked=True	False	AC3
+Booking ends at requested start	Request 600–660; existing 540–600	True	Touching endpoints are allowed
+Booking starts at requested end	Request 600–660; existing 660–720	True	Touching endpoints are allowed
+Exact duplicate interval	Request 600–660; existing 600–660	False	Complete overlap
+Requested interval inside existing	Request 610–650; existing 600–660	False	Overlap
+Existing interval inside requested	Request 600–660; existing 610–650	False	Overlap
+Empty booking list	Valid future interval; existing=[]	True if otherwise valid	No conflicts
+Conflict after several nonconflicting bookings	One overlapping interval appears late in existing	False	Every booking must be considered
+Input preservation	Record existing before and after the call	Unchanged	AC5
+Key implementation risk: getting the overlap condition wrong. For half-open intervals, two intervals overlap precisely when
+\[
+\text{start} < \text{existing\_end}
+\quad\land\quad
+\text{existing\_start} < \text{end}
+\]
+
+Using <= instead of < in this overlap test would incorrectly reject bookings whose endpoints merely touch.
 ```
 
 **What the plan invented or changed.** One row for every rule in the plan that is not in the
