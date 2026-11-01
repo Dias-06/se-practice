@@ -1,89 +1,81 @@
 # SIS #03 — Report: Smart Campus Room Availability Checker
 
-<!-- The ONLY file you write prose in. Keep every numbered heading (## 1. … ## 13.) and every
-     ### sub-heading, and the **Label:** words — the checker finds your answers by them.
-     Replace every "(write here)" and "(paste here)". Delete these <!-- --> comments if you like. -->
-
 ## 1. Setup and reuse
 
-<!-- Model: the exact model with its version, as the tool shows it ("ChatGPT" is a tool, not a
-     model). If the tool does not show it, write: not displayed
-     Reuse: week-05 if code/original/booking_v1.py is your Week 05 v1, copied unedited;
-     week-06 if web/original/ is your Week 06 v1 export; fresh if you generated it for this SIS. -->
-
 | Item | Value |
-| --- | --- |
-| Coding assistant (tool) | (write here) |
-| Coding assistant model | (write here) |
-| Bolt.new model | (write here) |
-| Bolt project link | (write here) |
-| Language | (write here) |
-| Path | (write here) |
-| Python v1 from | (write here) |
-| Web v1 from | (write here) |
+| ------ | ------ |
+| Coding assistant (tool) | ChatGPT |
+| Coding assistant model | GPT-4o |
+| Bolt.new model | Claude 3.5 Sonnet |
+| Bolt project link | not displayed |
+| Language | Python 3.13 |
+| Path | Path A |
+| Python v1 from | week-05 |
+| Web v1 from | fresh |
 
 ## 2. Baseline — before any new AI exchange
+**System scope and AC1–AC6 in my own words:** The system evaluates study room availability on a single responsive page based on acceptance criteria AC1–AC6 without any database or backend interaction.
+- AC1: Times are integer minutes from midnight (0 <= start < end <= 1440), and start time must be strictly in the future (start > now).
+- AC2: Duration must not exceed 120 minutes (exactly 120 is permitted).
+- AC3: If the room is marked as blocked, all booking requests are rejected.
+- AC4: Overlaps with existing bookings are rejected. Touching intervals at endpoints (e.g., 600–660 and 660–720) do not overlap and must be allowed.
+- AC5: Returns True/Available strictly when AC1–AC4 hold, False/Unavailable otherwise. Never mutates input booking lists.
+- AC6: Understandable validation feedback is provided on both desktop and mobile layouts (~375px wide).
 
-<!-- Written by you, without AI, before the first exchange of this SIS. Commit and push it
-     first (README §2). Reusing Week 05/06 work does not exempt you: this section is new. -->
+**Two real failure points where AI code usually breaks:**
+1. Endpoint touching logic: AI often uses `<=` or `>=` instead of strictly half-open interval checks, incorrectly rejecting valid touching bookings (e.g., 660–720 against 600–660).
+2. Input list mutation: AI functions sometimes attempt to sort or modify the existing bookings list in-place, violating AC5 immutability requirements.
+
+**Contract and assumptions:**
+- can_book(start, end, now, blocked, existing) -> bool
+- Preconditions: now is valid (0–1439), blocked is Boolean, existing contains valid (start, end) tuples.
 
 ### 2.1 Scope in my own words
-
-**Scope:** (write here)
+**Scope:** The system provides a single-page room availability checker for students to test candidate booking slots against predefined criteria without creating database records or external API requests.
 
 ### 2.2 The acceptance criteria in my own words
-
 | AC | In my own words |
-| --- | --- |
-| AC1 | (write here) |
-| AC2 | (write here) |
-| AC3 | (write here) |
-| AC4 | (write here) |
-| AC5 | (write here) |
-| AC6 | (write here) |
+| ------ | ------ |
+| AC1 | Candidate times must be valid integer minutes after midnight (0 <= start < end <= 1440) and start strictly after now. |
+| AC2 | Booking length must be 120 minutes or less (exactly 120 minutes is allowed). |
+| AC3 | Any booking request must return False if the room is currently blocked. |
+| AC4 | Overlapping with active bookings is forbidden, but touching endpoints (e.g. 600–660 and 660–720) is permitted. |
+| AC5 | Result must be a strict Boolean, and the caller's existing list of bookings must remain unmodified. |
+| AC6 | Clear feedback must be displayed to the user, and the layout must be usable on mobile screens (~375px). |
 
 ### 2.3 Likely failure points
-
-<!-- At least two. The brief's examples: endpoint overlap, starts-now. -->
-
 | # | Failure point | AC | How I will check it |
-| --- | --- | --- | --- |
-| 1 | (write here) | (write here) | (write here) |
-| 2 | (write here) | (write here) | (write here) |
+| ------ | ------ | ------ | ------ |
+| 1 | AI treats touching endpoints as overlap using `<=` or `>=` | AC4 | Test adjacent booking (660, 720) against existing [(600, 660)] and expect True. |
+| 2 | AI mutates or sorts the existing list in-place | AC5 | Pass a list of tuples and assert list identity and equality before and after the call. |
 
 ### 2.4 The contract
-
 | Parameter | Meaning | Type and allowed values |
-| --- | --- | --- |
-| `start` | (write here) | (write here) |
-| `end` | (write here) | (write here) |
-| `now` | (write here) | (write here) |
-| `blocked` | (write here) | (write here) |
-| `existing` | (write here) | (write here) |
-| returns | (write here) | (write here) |
+| ------ | ------ | ------ |
+| start | Requested booking start time in minutes from midnight | Integer, 0 to 1439 |
+| end | Requested booking end time in minutes from midnight | Integer, 1 to 1440 |
+| now | Current time in minutes from midnight | Integer, 0 to 1439 |
+| blocked | Room availability flag | Boolean (True or False) |
+| existing | List of already scheduled bookings | List of (start, end) integer tuples |
+| returns | Availability decision | Strict Boolean (True if available, False otherwise) |
 
 ### 2.5 Initial assumptions and manual checks
-
 **Assumptions:**
-
-1. (write here)
-2. (write here)
+1. All input arguments conform strictly to expected types without needing custom type-casting.
+2. The current time parameter `now` is always within standard day bounds (0–1439).
 
 **Checked manually:**
-
-- (write here)
+- Endpoint touching case (660–720) returns Available when existing is [(600, 660)].
+- Request with start equal to current time (540–570 when now=540) returns Unavailable.
 
 ## 3. Python v1 review
 
-<!-- One row per conditional branch in code/original/booking_v1.py (your language's v1 on
-     Path B). Quote the condition exactly. AC1-AC4 must all appear in the AC column. -->
-
 | Branch in v1 (quoted) | AC | Satisfies it? | Why |
-| --- | --- | --- | --- |
-| (write here) | (write here) | (write here) | (write here) |
-| (write here) | (write here) | (write here) | (write here) |
-| (write here) | (write here) | (write here) | (write here) |
-| (write here) | (write here) | (write here) | (write here) |
+| ------ | ------ | ------ | ------ |
+| `if not (0 <= start < end <= 1440 and start > now): return False` | AC1 | Yes | Validates day bounds, correct time ordering, and ensures start is strictly in the future. |
+| `if end - start > 120: return False` | AC2 | Yes | Enforces maximum 120-minute duration limit while allowing exactly 120 minutes. |
+| `if blocked: return False` | AC3 | Yes | Rejects booking requests immediately if the room is marked as blocked. |
+| `if start < existing_end and existing_start < end: return False` | AC4 | Yes | Uses half-open interval comparison, correctly permitting touching endpoints. |
 
 ## 4. Prototype v1 in Bolt.new
 
