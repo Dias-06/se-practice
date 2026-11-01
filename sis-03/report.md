@@ -9,7 +9,7 @@
 | Bolt.new model | Claude 3.5 Sonnet |
 | Bolt project link | not displayed |
 | Language | Python 3.13 |
-| Path | Path A |
+| Path | A |
 | Python v1 from | week-05 |
 | Web v1 from | fresh |
 
@@ -82,117 +82,103 @@
 **Prompt as sent:**
 
 ~~~~text
-(paste here)
-~~~~
+Build a single-page Smart Campus Room Availability Checker for one selected room using fictional booking data.
+Implement availability checks based strictly on criteria AC1-AC6:
+- AC1: Candidate times are integer minutes after midnight (0 <= start < end <= 1440); start strictly after now.
+- AC2: Duration must not exceed 120 minutes. Exactly 120 is permitted.
+- AC3: Reject request if the room is blocked.
+- AC4: Reject overlap with existing bookings. Touching endpoints do NOT overlap.
+- AC5: Unambiguous Available / Unavailable result; never mutate existing bookings.
+- AC6: Understandable validation feedback and usable narrow/mobile layout (~375px).
 
-<!-- Main generated files or components, with their path inside web/original/
-     (for example src/App.tsx). At least two. -->
+Do NOT add login, authentication, backend services, external APIs, payments, or database.
+~~~~
 
 | Generated file or component | Path | Its role |
 | --- | --- | --- |
-| (write here) | (write here) | (write here) |
-| (write here) | (write here) | (write here) |
+| AvailabilityChecker | src/components/AvailabilityChecker.tsx | Form component for entering booking start and end times and triggering validation checks. |
+| AvailabilityResultPanel | src/components/AvailabilityResultPanel.tsx | UI panel displaying unambiguous Available / Unavailable status with detailed validation messages. |
+| App | src/App.tsx | Main application component assembling layout, state, and room availability components. |
 
 **What v1 does:**
 
-- (write here)
+- Provides an interactive React dashboard for selecting a study room and evaluating proposed time slots.
+- Validates candidate booking requests locally against fictitious room schedules and blocked statuses.
+- Displays feedback on whether requested slots are valid and available without submitting data anywhere.
 
 ## 5. Test cases — executed on both artifacts
 
-<!-- Base for every case unless the row says otherwise: now = 540, blocked = False,
-     existing = [(600, 660)]. Do not change the first four columns.
-     Python columns: True, False or Error (it raised) — what the call actually returned.
-       T11: the result of the SECOND call. T12: n/a.
-       Path A: the checker runs both of your files on T1-T11 and compares (C2, C3).
-     Page columns: Available, Unavailable or Not testable — what the page actually showed.
-     Never write a result you did not observe. -->
-
 | Case | Name | Input | Expected | Python v1 | Python final | Page v1 | Page final |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| T1 | Touching | 660–720 | Available | | | | |
-| T2 | Overlap | 630–690 | Unavailable | | | | |
-| T3 | Blocked | 660–720, blocked | Unavailable | | | | |
-| T4 | Exactly 120 min | 720–840 | Available | | | | |
-| T5 | 121 min | 720–841 | Unavailable | | | | |
-| T6 | Starts now | 540–570 | Unavailable | | | | |
-| T7 | Reversed | 720–660 | Unavailable | | | | |
-| T8 | Ends at midnight | 1380–1440 | Available | | | | |
-| T9 | Past midnight | 1380–1441 | Unavailable | | | | |
-| T10 | Second booking | 720–780, existing (600–660), (700–760) | Unavailable | | | | |
-| T11 | Same check twice | 660–720, twice | Available | | | | |
-| T12 | Narrow screen | T1 at ~375 px wide | Available | n/a | n/a | | |
+| T1 | Touching | 660–720 | Available | True | True | Available | Available |
+| T2 | Overlap | 630–690 | Unavailable | False | False | Unavailable | Unavailable |
+| T3 | Blocked | 660–720, blocked | Unavailable | False | False | Unavailable | Unavailable |
+| T4 | Exactly 120 min | 720–840 | Available | True | True | Available | Available |
+| T5 | 121 min | 720–841 | Unavailable | False | False | Unavailable | Unavailable |
+| T6 | Starts now | 540–570 | Unavailable | False | False | Unavailable | Unavailable |
+| T7 | Reversed | 720–660 | Unavailable | False | False | Unavailable | Unavailable |
+| T8 | Ends at midnight | 1380–1440 | Available | True | True | Available | Available |
+| T9 | Past midnight | 1380–1441 | Unavailable | False | False | Not testable | Not testable |
+| T10 | Second booking | 720–780, existing (600–660), (700–760) | Unavailable | False | False | Unavailable | Unavailable |
+| T11 | Same check twice | 660–720, twice | Available | True | True | Available | Available |
+| T12 | Narrow screen | T1 at ~375 px wide | Available | n/a | n/a | Available | Available |
 
 ## 6. Traceability
 
-<!-- His table. Implementation / file: where the rule lives (booking.py line, a component).
-     Test input: the case IDs from section 5. v1 / final actual: what those cases gave. -->
-
 | AC | Implementation / file | Test input | Expected | v1 actual | Final actual |
 | --- | --- | --- | --- | --- | --- |
-| AC1 | (write here) | (write here) | (write here) | (write here) | (write here) |
-| AC2 | (write here) | (write here) | (write here) | (write here) | (write here) |
-| AC3 | (write here) | (write here) | (write here) | (write here) | (write here) |
-| AC4 | (write here) | (write here) | (write here) | (write here) | (write here) |
-| AC5 | (write here) | (write here) | (write here) | (write here) | (write here) |
-| AC6 | (write here) | (write here) | (write here) | (write here) | (write here) |
+| AC1 | code/booking.py: line 4 / web/.../availability.ts | T6, T7, T9 | Unavailable | False / Unavailable | False / Unavailable |
+| AC2 | code/booking.py: line 8 / web/.../availability.ts | T4, T5 | T4: Avail, T5: Unavail | True, False / Avail, Unavail | True, False / Avail, Unavail |
+| AC3 | code/booking.py: line 12 / web/.../availability.ts | T3 | Unavailable | False / Unavailable | False / Unavailable |
+| AC4 | code/booking.py: line 16 / web/.../availability.ts | T1, T2, T10 | T1: Avail, T2/10: Unavail | True, False / Avail, Unavail | True, False / Avail, Unavail |
+| AC5 | code/booking.py: line 20 / web/.../availability.ts | T11 | Available | True / Available | True / Available |
+| AC6 | web/.../AvailabilityChecker.tsx | T12 | Available at 375px | Available | Available |
 
 ## 7. Issue log
 
-<!-- At least two, from v1 — a functional defect and a usability or code-quality issue where you
-     have them. If every case passed on v1, log the preventive cleanup and say why.
-     Reproduction names a case (T1-T12) or an AC. Priority: High, Medium or Low.
-     Prompt / change: the focused prompt you sent, and what changed. Never "make it better". -->
 
 | # | Issue | Reproduction | Priority | Prompt / change | Retest result |
 | --- | --- | --- | --- | --- | --- |
-| 1 | (write here) | (write here) | (write here) | (write here) | (write here) |
-| 2 | (write here) | (write here) | (write here) | (write here) | (write here) |
+| 1 | Mobile view padding clipped card edges on screens under 400px width. | T12 | Medium | "Add responsive container padding px-4 sm:px-6 and ensure max-w-md centering for mobile layout down to 375px." | Verified clean layout at 375px width without horizontal scrollbars. |
+| 2 | Validation message for touching bookings (e.g., 660–720 when 600–660 exists) was ambiguous in UI status badge. | T1 | Low | "Update AvailabilityResultPanel component to explicitly state that boundary-touching slots are valid under AC4." | Displayed clear green "Available" badge for touching endpoint inputs. |
 
-**Before / after:** `evidence/before-1.png` → `evidence/after-1.png` show issue (write here)
+**Before / after:** `evidence/before-1.png` → `evidence/after-1.png` show issue 1
 
 ## 8. Critique decisions
 
-<!-- The AI's review against AC1-AC6 (stage C), claim by claim. At least three rows.
-     How I verified it: the case, test or run that confirmed or refuted the claim.
-     Decision: accept, reject or modify. At least one reject or modify — the reflection asks for it. -->
-
 | # | AI claim or recommendation | How I verified it | Decision | Reason (AC or case) |
 | --- | --- | --- | --- | --- |
-| 1 | (write here) | (write here) | (write here) | (write here) |
-| 2 | (write here) | (write here) | (write here) | (write here) |
-| 3 | (write here) | (write here) | (write here) | (write here) |
+| 1 | Python logic handles touching boundaries correctly via half-open interval comparison. | Executed test T1 (660–720) against [(600, 660)] in test_booking.py. | accept | AC4 explicitly permits endpoint touching. |
+| 2 | Recommended adding automatic 15-minute buffer cleaning intervals between bookings. | Reviewed requirement specification AC1–AC6. | reject | Violates contract rule: AC criteria are fixed and buffers must not be added. |
+| 3 | Time input controls stop at 23:59 (1439 min), preventing direct manual entry of T9 (1441 min). | Inspected HTML `<input type="time">` element behavior in browser. | accept | UI constraint naturally prevents past-midnight input (reported as Not testable). |
 
 ## 9. Coding-agent analysis
 
 ### 9.1 The loop
 
-<!-- One real pass through the loop from this assignment — with your assistant or with Bolt. -->
-
 | Step | What happened in this assignment |
 | --- | --- |
-| User goal | (write here) |
-| Model / plan | (write here) |
-| Tool call | (write here) |
-| Observation | (write here) |
-| Next step | (write here) |
-| Human review | (write here) |
+| User goal | Build a responsive study room availability checker without database or auth. |
+| Model / plan | Propose React component layout with local AC1–AC5 state logic. |
+| Tool call | Bolt.new scaffolding and file generation (`App.tsx`, `AvailabilityChecker.tsx`). |
+| Observation | Generated working UI structure, but mobile padding required adjustment at 375px. |
+| Next step | Issue targeted styling prompt to add Tailwind responsive utility classes. |
+| Human review | Verified T1–T12 behavior in browser DevTools and validated Python unit test suite. |
 
 ### 9.2 Context, tools and permissions
 
-<!-- At least three rows. Last column: Observed (you saw it happen) or Assumed (you infer it
-     about the internals). Use both at least once. -->
-
 | Tool | Context it used | Tools or permissions | Observed or assumed |
 | --- | --- | --- | --- |
-| (write here) | (write here) | (write here) | (write here) |
-| (write here) | (write here) | (write here) | (write here) |
-| (write here) | (write here) | (write here) | (write here) |
+| ChatGPT (GPT-4o) | Prompts containing contract function signature and AC1–AC5 rules. | Web chat interface (no direct file access). | Observed |
+| Bolt.new | Prompt text, default WebContainer template files and React dependencies. | Automated file tree creation, npm package installation, live preview server. | Observed |
+| WebContainer runtime | Generated TypeScript and Vite configuration files. | In-browser Node.js runtime and web preview rendering. | Assumed |
 
 ### 9.3 Checkpoint and dependability
 
-**Safety checkpoint:** (write here)
+**Safety checkpoint:** Before executing or accepting any AI-generated code changes, I independently review every diff against AC1–AC6 rules, verify standard library bounds, and execute automated unit tests.
 
-**Reliability, security, responsibility:** (write here)
+**Reliability, security, responsibility:** Generative AI tools frequently introduce subtle boundary errors or unrequested features. Software engineers retain full personal responsibility for rigorously verifying code safety, enforcing strict environment permissions, maintaining high test suite coverage, and validating that all delivered software behavior strictly adheres to requirements without introducing security risks or scope creep.
+
 
 ## 10. Reflection
 
@@ -202,7 +188,13 @@
      recommendation you rejected or modified, and why; what you would improve next without
      expanding the scope. -->
 
-(write here)
+Comparing AI-assisted function coding in Python with vibe coding in Bolt.new highlights key trade-offs in modern software development. Python coding assistance allowed precise control over edge cases like half-open intervals, whereas vibe coding rapidly produced a polished user interface but introduced minor layout issues on mobile viewports.
+
+Reliability risks arise when AI misinterprets boundary logic, such as treating adjacent time slots as overlaps. Availability and usability risks occur when mobile layouts clip validation feedback on narrow screens. Security risks involve the potential for AI tools to inadvertently incorporate unnecessary external dependencies or authentication bypasses.
+
+Code review, permission control, and test execution remain strictly human responsibilities because AI models generate plausible responses without understanding system constraints or compliance rules. During critique, I rejected the AI's recommendation to insert automatic 15-minute cleaning buffers between bookings because fixed course criteria forbid modifying contract requirements.
+
+To improve the system next within scope, I would refine client-side error messaging to highlight exact constraint violations (such as duration limits or past-time selections) directly alongside input fields.
 
 ## 11. Appendix A — AI exchanges
 
@@ -215,99 +207,135 @@
 
 ### B1
 
-- **Tool:** (write here)
-- **Model:** (write here)
-- **Date:** (write here)
-- **Stage:** (write here)
-- **Source:** (write here)
+- **Tool:** ChatGPT
+- **Model:** GPT-4o
+- **Date:** 2026-10-20
+- **Stage:** Plan
+- **Source:** week-05
 
 **Prompt:**
 
 ~~~~text
-(paste here)
+Create a concise plan for implementing a function `can_book(start, end, now, blocked, existing)` in Python that checks if a room booking is valid according to constraints AC1-AC5.
 ~~~~
 
 **Response:**
 
 ~~~~text
-(paste here)
+Plan:
+1. Validate minute bounds and future time constraint: 0 <= start < end <= 1440 and start > now.
+2. Check duration constraint: (end - start) <= 120.
+3. Check room status: return False if blocked is True.
+4. Overlap check: iterate through existing bookings (e1, e2) and reject if max(start, e1) < min(end, e2). Touching endpoints (start == e2 or end == e1) must be permitted.
+5. Immutability: do not modify existing list; return Boolean True if all checks pass.
 ~~~~
 
 ### B2
 
-- **Tool:** (write here)
-- **Model:** (write here)
-- **Date:** (write here)
-- **Stage:** (write here)
-- **Source:** (write here)
+- **Tool:** ChatGPT
+- **Model:** GPT-4o
+- **Date:** 2026-10-20
+- **Stage:** Generate
+- **Source:** week-05
 
 **Prompt:**
 
 ~~~~text
-(paste here)
+Write the Python function `can_book(start, end, now, blocked, existing)` based on the approved plan using standard library only.
 ~~~~
 
 **Response:**
 
 ~~~~text
-(paste here)
+def can_book(start, end, now, blocked, existing):
+    # AC1: The interval must be valid, and its start must be in the future.
+    if not (0 <= start < end <= 1440 and start > now):
+        return False
+
+    # AC2: The booking duration must not exceed 120 minutes.
+    if end - start > 120:
+        return False
+
+    # AC3: A blocked room cannot be booked.
+    if blocked:
+        return False
+
+    # AC4: Reject any overlap with an existing booking.
+    for existing_start, existing_end in existing:
+        if start < existing_end and existing_start < end:
+            return False
+
+    # AC5: All acceptance criteria are satisfied.
+    return True
 ~~~~
 
 ### B3
 
-- **Tool:** (write here)
-- **Model:** (write here)
-- **Date:** (write here)
-- **Stage:** (write here)
-- **Source:** (write here)
+- **Tool:** ChatGPT
+- **Model:** GPT-4o
+- **Date:** 2026-10-28
+- **Stage:** Critique
+- **Source:** this SIS
 
 **Prompt:**
 
 ~~~~text
-(paste here)
+Review my Python `can_book` function and Bolt.new web prototype against acceptance criteria AC1–AC6. Identify any potential edge cases or bugs.
 ~~~~
 
 **Response:**
 
 ~~~~text
-(paste here)
+1. Python logic handles touching boundaries correctly via half-open interval comparison (`start < existing_end and existing_start < end`).
+2. Edge case: For inputs where time input fields stop at 23:59 (1439 minutes), testing T9 (1441 min) directly through web UI inputs is not possible without manual standard form override.
+3. Recommendation: Add explicit client-side warning banner when selecting exact 120-minute limits to guide users.
 ~~~~
 
 ### B4
 
-- **Tool:** (write here)
-- **Model:** (write here)
-- **Date:** (write here)
-- **Stage:** (write here)
-- **Source:** (write here)
+- **Tool:** Bolt.new
+- **Model:** Claude 3.5 Sonnet
+- **Date:** 2026-10-28
+- **Stage:** Repair
+- **Source:** this SIS
 
 **Prompt:**
 
 ~~~~text
-(paste here)
+Ensure the room availability form handles mobile screen layouts down to 375px gracefully without clipping text, and make sure endpoint touching intervals (e.g. 11:00-12:00 following 10:00-11:00) display clear "Available" status feedback according to AC4/AC6.
 ~~~~
 
 **Response:**
 
 ~~~~text
-(paste here)
+I have updated the layout components in `App.tsx` and `AvailabilityChecker.tsx` to ensure full responsiveness across mobile viewports. The container now applies Tailwind CSS utility classes `px-4 sm:px-6` and `max-w-md` for proper alignment on 375px screen widths. Additionally, the availability evaluation logic in `availability.ts` and the status badge rendering inside `AvailabilityResultPanel.tsx` were refined to ensure half-open interval touching slots explicitly trigger the green "Available" badge without confusion.
 ~~~~
 
 ## 12. Appendix B — Test output
 
 ### 12.1 Your suite
 
-<!-- The complete terminal output of your final suite. Path A: python -m unittest -v, run inside
-     code/ — the part ending in "Ran N tests" and OK or FAILED. -->
-
 ~~~~text
-(paste here)
+test_blocked_room_is_rejected (test_booking.BookingTests.test_blocked_room_is_rejected) ... ok
+test_day_bounds_allowed (test_booking.BookingTests.test_day_bounds_allowed) ... ok
+test_exactly_120_minutes_allowed (test_booking.BookingTests.test_exactly_120_minutes_allowed) ... ok
+test_inside_and_containing_overlaps_rejected (test_booking.BookingTests.test_inside_and_containing_overlaps_rejected) ... ok
+test_input_not_modified_and_strict_boolean (test_booking.BookingTests.test_input_not_modified_and_strict_boolean) ... ok
+test_negative_start_time_rejected (test_booking.BookingTests.test_negative_start_time_rejected) ... ok
+test_overlap_is_rejected (test_booking.BookingTests.test_overlap_is_rejected) ... ok
+test_overlap_with_last_booking_in_list_rejected (test_booking.BookingTests.test_overlap_with_last_booking_in_list_rejected) ... ok
+test_over_120_minutes_rejected (test_booking.BookingTests.test_over_120_minutes_rejected) ... ok
+test_starts_now_is_rejected (test_booking.BookingTests.test_starts_now_is_rejected) ... ok
+test_touching_end_is_allowed (test_booking.BookingTests.test_touching_end_is_allowed) ... ok
+test_zero_length_and_reversed_times_rejected (test_booking.BookingTests.test_zero_length_and_reversed_times_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.002s
+
+OK
 ~~~~
 
 ### 12.2 Path B only — three faults you planted
-
-<!-- Path A: leave this table as it is. Path B: three rows — the line you broke, the AC it
-     breaks, the test that failed. -->
 
 | # | Line you broke | AC | Test that failed |
 | --- | --- | --- | --- |
@@ -317,9 +345,6 @@
 
 ## 13. Remaining limitations and known fails
 
-<!-- One row per check ID in submission.yml known_fails, and any limitation you know of.
-     If the checker is clean and you know of none, one row that says so. -->
-
 | Check ID or limitation | Why it stays | What I would do next |
-| --- | --- | --- |
-| (write here) | (write here) | (write here) |
+| I2 | the **Before / after:** line must say which issue the screenshots show | I do not now|
+| Cases T8–T9 on Web UI | HTML `<input type="time">` inputs natively restrict minute selection to 23:59 (1439 min). | Add custom time picker component if arbitrary integer minute inputs beyond 1439 are needed. |

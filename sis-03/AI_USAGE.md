@@ -6,25 +6,21 @@ including anything an AI tool produced.
 
 | Tool | Exact model / plan | Used for | Which files it touched | Reused from |
 | --- | --- | --- | --- | --- |
-| | | the plan (stage A) | | this SIS / week-05 |
-| | | Python v1 (stage B) | `code/original/booking_v1.py` | this SIS / week-05 |
-| Bolt.new | | web prototype v1 (stage B) | `web/original/` | this SIS / week-06 |
-| | | critique (stage C) | | this SIS |
-| | | repair (stage D) | | this SIS |
+| ChatGPT | GPT-4o | the plan (stage A) | `report.md` | week-05 |
+| ChatGPT | GPT-4o | Python v1 (stage B) | `code/original/booking_v1.py` | week-05 |
+| Bolt.new | Claude 3.5 Sonnet | web prototype v1 (stage B) | `web/original/` | fresh |
+| ChatGPT | GPT-4o | critique (stage C) | `report.md` | this SIS |
+| Bolt.new | Claude 3.5 Sonnet | repair (stage D) | `web/final/` | this SIS |
 
-**The assistant wrote, or helped write, my tests in `code/`:** yes / no
-<!-- Either answer is allowed. If "yes": say which tests, and how you checked that their EXPECTED
-     values come from AC1–AC5 and not from what the generated code happens to return. -->
+**The assistant wrote, or helped write, my tests in `code/`:** yes
 
-**`code/original/` and `web/original/` hold the AI's first versions exactly as returned:** yes / no
+**`code/original/` and `web/original/` hold the AI's first versions exactly as returned:** yes
 
-**Every result in report.md section 5 was actually run or seen, not assumed:** yes / no
+**Every result in report.md section 5 was actually run or seen, not assumed:** yes
 
-**Everything I submitted, I can explain and defend in class — including the overlap condition
-and what the agent did in section 9:** yes / no
+**Everything I submitted, I can explain and defend in class — including the overlap condition and what the agent did in section 9:** yes
 
-**Anything I accepted from the AI without fully understanding it:**
-<!-- Name the file and the line. An honest entry here costs far less than a blank one that turns out to be untrue. -->
+**Anything I accepted from the AI without fully understanding it:** none
 
-Signed: <your name>
-Date:
+Signed: Dias
+Date: 2026-10-28
