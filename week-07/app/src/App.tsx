@@ -31,7 +31,7 @@ export default function App() {
 
   const room = ROOMS.find(r => r.id === roomId)!;
 
-  function check() {
+ function check() {
     setResult(null);
     if (!start || !now || (!end && !endOfDay)) {
       setError('Fill in the current time, the start and the end.');
@@ -46,19 +46,13 @@ export default function App() {
       setError('');
     }
 
-    let ok = true;
-    if (!(0 <= s && s < e && e <= 1440)) ok = false;
-    else if (!(s > n)) ok = false;
-    else if (e - s > 120) ok = false;
-    else if (blocked) ok = false;
-    else {
-      for (const b of room.bookings) {
-        if (s < b.end && e > b.start) {
-          ok = false;
-          break;
-        }
-      }
-    }
+    const ok = canBook({
+      start: s,
+      end: e,
+      now: n,
+      blocked,
+      bookings: room.bookings,
+    });
     setResult(ok);
   }
 
