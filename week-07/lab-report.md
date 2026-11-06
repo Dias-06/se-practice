@@ -29,16 +29,16 @@ grader find your answers by them. You can add rows to any table, but never remov
 
 | | |
 | --- | --- |
-| File and function (or "inside the page component") | |
-| Its inputs | |
-| What it returned | |
-| How the page used it | |
+| File and function "inside the page component" | |
+| Its inputs | start, end, now, blocked, bookings |
+| What it returned | boolean status / validation output |
+| How the page used it | evaluated inline within component state |
 
 **What I changed to extract `canBook`.** Say which file it now lives in, what you moved, and why
 the behaviour did not change. Also say which file of the page now calls it. 40 words or more.
 
 <!-- Write below this line -->
-
+Extracted the room availability checking logic from the main page component into a standalone function canBook located in src/booking.ts. The function receives structured parameters ({ start, end, now, blocked, bookings }) and returns a strict boolean decision without altering input state. The main UI page now imports and delegates the availability calculation to
 ---
 
 ## 3. Task 2 — the test plan
