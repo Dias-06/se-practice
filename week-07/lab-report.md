@@ -1,6 +1,6 @@
 # Week 07 — Lab report
 
-**Name:**
+**Name: **
 **Group:**
 **Date:**
 
@@ -43,29 +43,27 @@ Extracted the room availability checking logic from the main page component into
 
 ## 3. Task 2 — the test plan
 
-Default fixture: `now = 540`, `blocked = false`, `bookings = [{ start: 600, end: 660 }]`, fresh
-for every test. **The Expected column comes from AC1–AC4, never from the code.** Write the
-**reason** for each expected result **before** you send the generation prompt.
+Default fixture: `now = 540`, `blocked = false`, `bookings = [{ start: 600, end: 660 }]`, fresh for every test. **The Expected column comes from AC1–AC4, never from the code.** Write the **reason** for each expected result **before** you send the generation prompt.
 
 | ID | Candidate / changed input | Expected | AC | Reason (in your words) |
 | --- | --- | --- | --- | --- |
-| T01 | 660–720 (touching after) | true | AC4 | |
-| T02 | 540–570 (starts now) | false | AC1 | |
-| T03 | 720–720 (zero duration) | false | AC1 | |
-| T04 | 750–720 (reversed) | false | AC1 | |
-| T05 | 1380–1441 (past day end) | false | AC1 | |
-| T06 | 720–840 (120 minutes) | true | AC2 | |
-| T07 | 720–841 (121 minutes) | false | AC2 | |
-| T08 | 570–600 (touching before) | true | AC4 | |
-| T09 | 630–690 (partial overlap) | false | AC4 | |
-| T10 | 570–690 (contains booking) | false | AC4 | |
-| T11 | 615–645 (inside booking) | false | AC4 | |
-| T12 | 600–660 (identical interval) | false | AC4 | |
-| T13 | 660–720, blocked = true | false | AC3 | |
-| T14 | 630–690, bookings = [] | true | AC4 | |
-| AC5 | an Available request — the bookings after the call equal the bookings before | true, data unchanged | AC5 | |
-| X1 | | | | |
-| X2 | | | | |
+| T01 | 660–720 (touching after) | true | AC4 | 660 is excluded from 600–660, so intervals touch at boundary without overlapping. |
+| T02 | 540–570 (starts now) | false | AC1 | AC1 requires start > now, but here start equals now (540 == 540). |
+| T03 | 720–720 (zero duration) | false | AC1 | AC1 requires start < end, so zero duration interval is invalid. |
+| T04 | 750–720 (reversed) | false | AC1 | AC1 requires start < end, reversed start and end are invalid. |
+| T05 | 1380–1441 (past day end) | false | AC1 | AC1 limits end to 1440, so 1441 exceeds the day limit. |
+| T06 | 720–840 (120 minutes) | true | AC2 | AC2 allows bookings up to at most 120 minutes, so exactly 120 is permitted. |
+| T07 | 720–841 (121 minutes) | false | AC2 | Duration is 121 minutes, which exceeds AC2 limit of 120 minutes. |
+| T08 | 570–600 (touching before) | true | AC4 | 600 is start of existing booking; touching endpoints are allowed under AC4. |
+| T09 | 630–690 (partial overlap) | false | AC4 | Interval 630–660 overlaps with existing booking 600–660. |
+| T10 | 570–690 (contains booking) | false | AC4 | Candidate interval fully encloses existing booking 600–660. |
+| T11 | 615–645 (inside booking) | false | AC4 | Candidate interval lies entirely inside existing booking 600–660. |
+| T12 | 600–660 (identical interval) | false | AC4 | Exact match with existing booking interval 600–660 is a full overlap. |
+| T13 | 660–720, blocked = true | false | AC3 | AC3 requires immediate rejection if the room is blocked. |
+| T14 | 630–690, bookings = [] | true | AC4 | Empty bookings array means no overlaps exist. |
+| AC5 | an Available request — the bookings after the call equal the bookings before | true, data unchanged | AC5 | Checking availability must not mutate the input bookings array. |
+| X1 | 0–60 (start at midnight, now = 540) | false | AC1 | Start time 0 is not in the future relative to now = 540 (start <= now). |
+| X2 | 660–720, bookings = [{ start: 600, end: 660 }, { start: 720, end: 780 }] | true | AC4 | Slot 660–720 touches existing bookings on both ends (before and after) without overlapping either. |
 
 X1 and X2 are **your own two cases**: a boundary or a state that T01–T14 do not reach. Fill all
 five columns.
