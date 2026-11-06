@@ -76,14 +76,91 @@ five columns.
 `Vitest`, followed by the case table from section 3:
 
 ```text
-(paste here)
+Generate tests for the existing booking function using Vitest. Use AC1–AC6 and the reviewed case table below.
+
+Import the real function used by the page. Keep its code unchanged. Use fixed time and fresh fixtures. Assert exact decisions and unchanged booking data.
+
+Return the test file, run command, and AC mapping. Flag unclear requirements. We will run the tests ourselves.
+
+Function code (src/booking.ts):
+```typescript
+export function canBook({
+  start,
+  end,
+  now,
+  blocked,
+  bookings,
+}: {
+  start: number;
+  end: number;
+  now: number;
+  blocked: boolean;
+  bookings: Array<{ start: number; end: number }>;
+}): boolean {
+  if (start < 0 || end <= start || end > 1440 || start <= now) {
+    return false;
+  }
+  if (end - start > 120) {
+    return false;
+  }
+  if (blocked) {
+    return false;
+  }
+  for (const b of bookings) {
+    if (start < b.end && b.start < end) {
+      return false;
+    }
+  }
+  return true;
+}
+Case table:
+Default fixture: now = 540, blocked = false, bookings = [{ start: 600, end: 660 }]
+T01: 660–720 (touching after) -> true (AC4)
+T02: 540–570 (starts now) -> false (AC1)
+T03: 720–720 (zero duration) -> false (AC1)
+T04: 750–720 (reversed) -> false (AC1)
+T05: 1380–1441 (past day end) -> false (AC1)
+T06: 720–840 (120 minutes) -> true (AC2)
+T07: 720–841 (121 minutes) -> false (AC2)
+T08: 570–600 (touching before) -> true (AC4)
+T09: 630–690 (partial overlap) -> false (AC4)
+T10: 570–690 (contains booking) -> false (AC4)
+T11: 615–645 (inside booking) -> false (AC4)
+T12: 600–660 (identical interval) -> false (AC4)
+T13: 660–720, blocked = true -> false (AC3)
+T14: 630–690, bookings = [] -> true (AC4)
+AC5: an Available request — bookings after call equal bookings before -> true, data unchanged (AC5)
+X1: 0–60 (start at midnight, now = 540) -> false (AC1)
+X2: 660–720, bookings = [{ start: 600, end: 660 }, { start: 720, end: 780 }] -> true (AC4)
 ```
 
 **The assistant's answer: run command, AC mapping and any unclear requirements it flagged,
 pasted unedited.** Its test file goes to `suites/first/` and is not pasted here:
 
 ```text
-(paste here)
+The tests below use Vitest, import the actual canBook function from src/booking.ts, and leave production code unchanged.
+
+The test suite covers T01–T14, AC5, and X1–X2. Each test receives fresh fixtures, and all time values are fixed.
+1. Test file
+File: src/booking.test.ts
+3. Acceptance criteria mapping
+Acceptance criterion	Covered by
+AC1 — Invalid time intervals	T02–T05, X1
+AC2 — Maximum duration of 120 minutes	T06–T07
+AC3 — Blocked availability	T13
+AC4 — Overlap detection	T01, T08–T12, T14
+AC5 — Booking data unchanged	Dedicated mutation test
+AC6	Not provided in the requirements
+
+Additional case T14 checks that a booking can fit exactly between two existing bookings.
+4. Unclear requirements and limitations
+There are three points worth clarifying before treating the suite as complete.
+1. AC5 — Scope of immutability. The provided function receives an array and returns a boolean. There is no separate booking creation or API request function. Therefore, the test verifies that calling canBook does not modify the supplied bookings array. It does not verify database or API persistence.
+2. AC6 — Missing acceptance criterion. AC6 is mentioned in the request but its actual requirement is absent. No test can be reliably assigned to it.
+3. AC1 — Negative start time. The implementation explicitly rejects start < 0, but the reviewed case table contains no dedicated negative-start test. Consider adding one.
+Important: The import assumes booking.test.ts is located alongside booking.ts in src/. If your project uses a different location for tests, adjust only the relative import path.
+
+The production function remains unchanged. The tests exercise the real implementation rather than a mock or rewritten copy.
 ```
 
 The first suite was saved to `suites/first/` **before** I changed anything in it: yes / no
