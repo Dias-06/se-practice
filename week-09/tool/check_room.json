@@ -1,0 +1,56 @@
+{
+  "name": "check_room",
+  "description": "Checks whether a study room is available for a requested time slot. This tool only checks availability and does not save or create a booking. All time values (start, end, now, and existing bookings) must be whole integer minutes since midnight in the range 0 to 1440.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "start": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 1440,
+        "description": "Requested booking start time in whole minutes since midnight (0 to 1440)."
+      },
+      "end": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 1440,
+        "description": "Requested booking end time in whole minutes since midnight (0 to 1440)."
+      },
+      "now": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 1440,
+        "description": "Current time in whole minutes since midnight (0 to 1440)."
+      },
+      "blocked": {
+        "type": "boolean",
+        "description": "Whether the room is currently blocked by an administrator (true or false)."
+      },
+      "bookings": {
+        "type": "array",
+        "description": "List of existing bookings for the room, each with start and end in whole minutes since midnight (0 to 1440). May be empty.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1440,
+              "description": "Existing booking start time in whole minutes since midnight."
+            },
+            "end": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1440,
+              "description": "Existing booking end time in whole minutes since midnight."
+            }
+          },
+          "required": ["start", "end"],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": ["start", "end", "now", "blocked", "bookings"],
+    "additionalProperties": false
+  }
+}
