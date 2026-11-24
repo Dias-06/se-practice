@@ -114,6 +114,7 @@ Supabase and login. These are optional, and I'd only add them if you ask.
 Which rules in its summary are wrong for this project, and how you know:
 
 <!-- Write below this line -->
+**Rules in its summary that are wrong for this project:** The summary falsely states that the test command is `npm run test:unit` (which does not exist in `package.json`), claims a database or login may be added if needed, omits `AC4` and `AC6`, and instructs running `netlify deploy --prod`.
 
 ---
 
@@ -125,6 +126,7 @@ Where it ran, and how you made sure it could not edit:
 
 <!-- Write below this line -->
 
+**Where it ran and how it could not edit:** Ran in ChatGPT (`GPT-4o`) web chat with pasted files (`app/src/booking.ts`, `app/src/App.tsx`, `app/package.json`, `app/AGENTS.md`), so the assistant had no filesystem access and could not edit any files.
 What you sent, exactly (the deck's prompt):
 
 ```text
@@ -287,14 +289,13 @@ At least five risks, each `confirmed` or `plausible`; at least two `confirmed`; 
 categories. **Score = L × I.** **Component** is a path inside `app/` or `missing: <check>`.
 
 | ID | Category | Cause → event → consequence | Component | Evidence | Status | L | I | Score | Mitigation | Owner | Verification |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ |
 | R1 | Agent operations | `AGENTS.md` contradicts AC4, names a missing `npm run test:unit`, permits Supabase/login, and mandates `npx netlify deploy --prod` → an autonomous agent breaks tests, adds out-of-scope auth/DB, or deploys to production → broken suite and unauthorized public deployment. | `AGENTS.md` | `AGENTS.md` lines 9, 16, 21, 26, 30; `npm run test:unit` missing in `package.json` | confirmed | 3 | 3 | 9 | Patch `AGENTS.md` minimally to align AC1–AC6, fix the test command to `npm test`, and forbid DB/login/secrets/deployments. | Dias | `git diff app/AGENTS.md` and `check_audit.py` checks `A1–A3`, `C1–C6` |
-| R2 | Correctness | `canBook` lacks finite-number validation (`Number.isFinite`) → `NaN` or `Infinity` arguments make every comparison evaluate to `false` → `canBook` returns `true` ("Available") for invalid non-finite inputs. | `src/booking.ts` (`canBook`) | `src/booking.ts:13-29` (`start < 0`, `end <= start`, ... evaluate to `false` on `NaN`) | confirmed | 2 | 3 | 6 | Refactor availability validation into a pure module (`src/availability.ts` + `src/booking.ts`) with an explicit `Number.isFinite` guard. | Dias | `npm test` with new `NaN` / `Infinity` test cases |
+| R2 | Correctness | `canBook` lacks finite-number validation (`Number.isFinite`) → `NaN` or `Infinity` arguments make every comparison evaluate to `false` → `canBook` returns `true` ("Available") for invalid non-finite inputs. | `src/booking.ts` (`canBook`) | `src/booking.ts:13-29` (`start < 0`, `end <= start`, ... evaluate to `false` on `NaN`) | confirmed | 2 | 3 | 6 | Refactor availability validation into a pure module (`src/booking.ts`) with an explicit `Number.isFinite` guard. | Dias | `npm test` with new `NaN` / `Infinity` test cases |
 | R3 | Correctness | `App.tsx` `check()` does not `return` when `!(s < e)` → `canBook` still runs on reversed/equal times → the UI displays both the validation error text and the "Unavailable" result simultaneously. | `src/App.tsx` (`check`) | `src/App.tsx:37-49` (`if (!(s < e)) { setError(...); }` without `return`) | confirmed | 2 | 2 | 4 | Add an early `return` in `check()` when `!(s < e)` (or clear the result cleanly) and verify manually in the UI. | Dias | Manual UI check on desktop and mobile widths |
 | R4 | Reliability | The repository lacks a CI workflow (`.github/workflows/`), pre-commit hooks, and an ESLint script (`npm run lint` missing) → broken builds or style/type regressions are not caught automatically before push → defective commits reach PRs. | missing: CI workflow and lint script | `npm run lint` failed (`Missing script: "lint"`); no `.github/` or `.husky/` in `week-10/app/` | confirmed | 2 | 2 | 4 | Enforce manual `npm test` and `npm run build` gates in `AGENTS.md` before acceptance. | Dias | Baseline run and final `npm test` + `npm run build` output |
 | R5 | Privacy | `AGENTS.md` instructs agents to fetch real room names and timetables from the KBTU portal and deploy publicly → real institutional schedule data could be scraped or fabricated and published → privacy/policy violation. | `AGENTS.md` | `AGENTS.md` line 9 ("use real room names and the real timetable from the KBTU portal") | confirmed | 2 | 3 | 6 | Replace the directive in `AGENTS.md` with an explicit rule requiring one fictional room and zero real personal/institutional data. | Dias | Diff review of `app/AGENTS.md` (`C1`, `C4`) |
-| R6 | Correctness | `App.tsx` passes the checkbox state `blocked` instead of `room.blocked` and keeps a stale `result` when inputs change → the UI can misrepresent room status until re-checked → user confusion. | `src/App.tsx` | `src/App.tsx:24, 44, 54-62` (`blocked` state independent of `room.blocked`, `onChange` handlers do not reset `result`) | | | | | | | |
-
+| R6 | Correctness | `App.tsx` passes checkbox `blocked` directly to `canBook` instead of combining with `room.blocked` → user unchecking box could bypass room block state → incorrect availability shown. | `src/App.tsx` | `src/App.tsx` passes `blocked` state directly to `canBook` without checking `room.blocked` | plausible | 2 | 2 | 4 | Combine `room.blocked` and `blocked` with logical OR in `App.tsx`. | Dias | Manual UI check with blocked room |
 ### 4.2 The top two for action
 
 Two confirmed risks, highest score first, each with the evidence that justifies its score.
@@ -454,7 +455,7 @@ index b786d88..5c1cd5a 100644
 
 ### 7.1 The regression test fails before the mitigation
 
-The risk it covers: **R?**. The real run, with the new test failing:
+The risk it covers: **R2**. The real run, with the new test failing:
 
 ```text
 ❯ app/src/booking.test.ts (18 tests | 1 failed) 10ms
@@ -530,18 +531,47 @@ Automated component/E2E tests (React Testing Library / Playwright) — not insta
 
 ### 8.1 The first mitigation
 
-**Risk:** R?
+**Risk:** R1
 
 **If this is the refactor** — the prompt you sent (README Part 8), then the problem → pattern → benefit
 line. Otherwise leave both empty.
 
 ```text
-(the refactor prompt, if this is the refactor)
 ```
 
 **Problem → pattern → benefit:**
 
-**What I rejected from the agent's patch, and why:**
+**What I rejected from the agent's patch, and why: Rejected adding a new `## You must not` heading (to preserve the exact original headings of `provided/AGENTS.md`) and rejected leaving `AC4` and `AC6` incomplete; merged the prohibitions into existing sections and explicitly aligned `AC1–AC6`.**
+
+The diff I approved (`git diff`):
+
+```text
+diff --git a/week-10/app/AGENTS.md b/week-10/app/AGENTS.md
+index b786d88..5c1cd5a 100644
+--- a/week-10/app/AGENTS.md
++++ b/week-10/app/AGENTS.md
+@@ -9,30 +9,30 @@ A React + TypeScript page (Vite) that tells a student whether a campus room is f
+ requested time. The booking rule lives in `src/booking.ts` (`canBook`); the page is `src/App.tsx`;
+ the tests are in `src/booking.test.ts`.
+
+-For realism, use real room names and the real timetable from the KBTU portal.
++Use one fictional room with synthetic bookings; do not use real KBTU portal data or personal information.
+```
+
+### 8.2 The second mitigation
+
+**Risk:** R2
+
+**If this is the refactor** — the prompt you sent (README Part 8), then the problem → pattern → benefit
+line. Otherwise leave both empty.
+
+```text
+Refactor the availability logic into a small, pure module, keeping the existing function inputs, outputs, and UI behavior. Use a pattern only if the identified design problem justifies it. Do not add new features or dependencies. Show the files you plan to edit before making changes.
+```
+
+**Problem → pattern → benefit:** `canBook` mixed magic numbers (`120`, `1440`) and four validation rules in one monolithic body without checking for `NaN` or `Infinity`, allowing non-finite inputs to bypass comparisons and return `true`. Extracting pure helper functions (`hasFiniteTimes`, `isValidWindow`, `withinMaxDuration`, `overlapsAny`) with no unjustified OOP pattern isolates each rule cleanly and rejects non-finite inputs while keeping all 18 tests green.
+
+**What I rejected from the agent's patch, and why:** rejected leaving non-finite inputs unhandled and rejected unnecessary extra class abstractions.
 
 The diff I approved (`git diff`):
 
@@ -556,27 +586,63 @@ index bed2435..d2936c0 100644
 +
 +type Interval = { start: number; end: number };
 +
-```
-
-### 8.2 The second mitigation
-
-**Risk:** R?
-
-**If this is the refactor** — the prompt you sent (README Part 8), then the problem → pattern → benefit
-line. Otherwise leave both empty.
-
-```text
-Refactor the availability logic into a small, pure module, keeping the existing function inputs, outputs, and UI behavior. Use a pattern only if the identified design problem justifies it. Do not add new features or dependencies. Show the files you plan to edit before making changes.
-```
-
-**Problem → pattern → benefit:**
-
-**What I rejected from the agent's patch, and why:**
-
-The diff I approved (`git diff`):
-
-```text
-(paste here)
++function hasFiniteTimes(start: number, end: number, now: number): boolean {
++  return Number.isFinite(start) && Number.isFinite(end) && Number.isFinite(now);
++}
++
++function isValidWindow(start: number, end: number, now: number): boolean {
++  return (
++    hasFiniteTimes(start, end, now) &&
++    start >= 0 &&
++    end > start &&
++    end <= MINUTES_PER_DAY &&
++    start > now
++  );
++}
++
++function withinMaxDuration(start: number, end: number): boolean {
++  return end - start <= MAX_DURATION_MINUTES;
++}
++
++function overlapsAny(start: number, end: number, bookings: Interval[]): boolean {
++  return bookings.some((b) => start < b.end && b.start < end);
++}
++
+ export function canBook({
+   start,
+   end,
+@@ -11,25 +38,10 @@ export function canBook({
+   blocked: boolean;
+   bookings: Array<{ start: number; end: number }>;
+ }): boolean {
+-
+-  if (start < 0 || end <= start || end > 1440 || start <= now) {
+-    return false;
+-  }
+-
+-  if (end - start > 120) {
+-    return false;
+-  }
+-
+-  if (blocked) {
+-    return false;
+-  }
+-
+-
+-  for (const b of bookings) {
+-    if (start < b.end && b.start < end) {
+-      return false;
+-    }
+-  }
+-
+-  return true;
++  return (
++    isValidWindow(start, end, now) &&
++    withinMaxDuration(start, end) &&
++    !blocked &&
++    !overlapsAny(start, end, bookings)
++  );
+ }
 ```
 
 ### 8.3 The residual risk
