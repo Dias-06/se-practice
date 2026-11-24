@@ -92,3 +92,10 @@ test('X2 AC4: slot touching two existing bookings on both boundaries', () => {
   const result = canBook({ start: 660, end: 720, now: 540, blocked: false, bookings });
   expect(result).toBe(true);
 });
+
+test('R2 AC1: non-finite inputs (NaN and Infinity) are rejected', () => {
+  expect(canBook({ start: Number.NaN, end: 720, now: 540, blocked: false, bookings: [] })).toBe(false);
+  expect(canBook({ start: 660, end: Number.NaN, now: 540, blocked: false, bookings: [] })).toBe(false);
+  expect(canBook({ start: 660, end: 720, now: Number.NaN, blocked: false, bookings: [] })).toBe(false);
+  expect(canBook({ start: 660, end: 720, now: Number.NEGATIVE_INFINITY, blocked: false, bookings: [] })).toBe(false);
+});
