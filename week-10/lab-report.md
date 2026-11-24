@@ -546,7 +546,16 @@ line. Otherwise leave both empty.
 The diff I approved (`git diff`):
 
 ```text
-(paste here)
+diff --git a/week-10/app/src/booking.ts b/week-10/app/src/booking.ts
+index bed2435..d2936c0 100644
+--- a/week-10/app/src/booking.ts
++++ b/week-10/app/src/booking.ts
+@@ -1,3 +1,30 @@
++const MAX_DURATION_MINUTES = 120;
++const MINUTES_PER_DAY = 1440;
++
++type Interval = { start: number; end: number };
++
 ```
 
 ### 8.2 The second mitigation
@@ -557,7 +566,7 @@ The diff I approved (`git diff`):
 line. Otherwise leave both empty.
 
 ```text
-(the refactor prompt, if this is the refactor)
+Refactor the availability logic into a small, pure module, keeping the existing function inputs, outputs, and UI behavior. Use a pattern only if the identified design problem justifies it. Do not add new features or dependencies. Show the files you plan to edit before making changes.
 ```
 
 **Problem → pattern → benefit:**
@@ -574,15 +583,40 @@ The diff I approved (`git diff`):
 
 | ID | L before | I before | Score before | L after | I after | Score after | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| | | | | | | | |
-| | | | | | | | |
+| R1 | 3 | 3 | 9 | 1 | 3 | 3 | `app/AGENTS.md` patched and committed; `AC1–AC6`, `npm test`, and bans on DB/login/secrets/deploys verified by `git diff`. |
+| R2 | 2 | 3 | 6 | 1 | 2 | 2 | `src/booking.ts` refactored with a `Number.isFinite` guard; regression test `R2 AC1` and all 18 tests pass in `npx vitest run`. |
 
 ### 8.4 The final run
 
 The real output of the **full** suite after both mitigations. Every test must pass.
 
 ```text
-(paste here)
+v1.6.0 C:/Users/diasm/se-practice/week-10/app
+
+ ✓ src/booking.test.ts (18)
+   ✓ T01 AC4: touching after existing booking
+   ✓ T02 AC1: starts at current time
+   ✓ T03 AC1: zero duration interval
+   ✓ T04 AC1: reversed start and end time
+   ✓ T05 AC1: ends after midnight boundary
+   ✓ T06 AC2: maximum booking duration of 120 minutes
+   ✓ T07 AC2: duration of 121 minutes exceeding maximum
+   ✓ T08 AC4: touching before existing booking
+   ✓ T09 AC4: partial overlap with existing booking
+   ✓ T10 AC4: candidate interval fully contains existing booking
+   ✓ T11 AC4: candidate interval lies entirely inside existing booking
+   ✓ T12 AC4: candidate interval identical to existing booking
+   ✓ T13 AC3: blocked room availability check
+   ✓ T14 AC4: availability request with empty bookings list
+   ✓ AC5: booking data remains unchanged after call
+   ✓ X1 AC1: start at midnight with past now time
+   ✓ X2 AC4: slot touching two existing bookings on both boundaries
+   ✓ R2 AC1: non-finite inputs (NaN and Infinity) are rejected
+
+ Test Files  1 passed (1)
+      Tests  18 passed (18)
+   Start at  17:37:23
+   Duration  492ms (transform 41ms, setup 1ms, collect 39ms, tests 3ms, environment 0ms, prepare 182ms)
 ```
 
 ---
@@ -595,13 +629,13 @@ Rules for an agent working asynchronously on a separate branch. Be specific to t
 its files and its commands.
 
 | Rule | What I require |
-| --- | --- |
-| Isolation | |
-| Permitted files | |
-| Commands | |
-| Prohibited actions | |
-| Required evidence | |
-| Before merging or deploying | |
+| ------ | ------ |
+| Isolation | Work only on a dedicated feature branch (e.g., `agent/task-name`) branched off `week-10`, inside `week-10/app/` only; never push directly to `main` or `week-10`. |
+| Permitted files | `week-10/app/src/booking.ts`, `week-10/app/src/App.tsx`, and `week-10/app/src/booking.test.ts` (may add tests, never delete or weaken existing tests). |
+| Commands | Run `npm test` (`npx vitest run`) and `npm run build` (`tsc && vite build`) inside `week-10/app/`; never run `npm run lint`, `npm run test:unit`, or `npx netlify deploy --prod`. |
+| Prohibited actions | Do not modify `week-10/provided/AGENTS.md`, `week-10/tests/`, or `week-10/app/package.json`; do not add a login page, database/Supabase, secrets/API keys, `.env` files, or real KBTU portal data; do not merge PRs or deploy externally. |
+| Required evidence | Full `git diff` of `week-10/app/src/`, complete `npm test` output showing all 18+ tests passing, `npm run build` exit status 0, and a summary of changed files and assumptions. |
+| Before merging or deploying | Stop at an open Pull Request with human review and explicit approval from the repository owner (`Dias`) after verifying `AC1–AC6` and checking desktop/mobile UI screenshots. |
 
 ### 9.2 Optional — the deck's checklist prompt (not graded)
 
@@ -611,15 +645,13 @@ its files and its commands.
 
 Use the same IDs as `known_fails` in `submission.yml`. Write `none` if the run is clean.
 
-| Check | Why it stays |
-| --- | --- |
-| | |
+none
 
 ---
 
 ## 10. Release decision and conclusion
 
-**Decision:** GO / CONDITIONAL / NO-GO
+**Decision:** CONDITIONAL
 
 <!-- Keep one word above. GO is not allowed while any confirmed risk still scores 6 or more.
      Then 80-150 words, in your own words, without the assistant: why this decision, from the
@@ -631,3 +663,4 @@ Use the same IDs as `known_fails` in `submission.yml`. Write `none` if the run i
      but no test covers App.tsx, so a regression there would be invisible." -->
 
 <!-- Write your conclusion below this line -->
+The release decision is **CONDITIONAL** because the core booking logic passes all 18 automated unit tests and builds cleanly, while the two highest-priority confirmed risks have been mitigated below the threshold of 6: **R1** (conflicting instructions in `app/AGENTS.md`) dropped from 9 to 3 after patching `AC1–AC6`, fixing `npm test`, and banning databases, secrets, and external deployments; **R2** (missing finite-number validation in `src/booking.ts`) dropped from 6 to 2 after refactoring `canBook` into pure helper functions with a `Number.isFinite` guard. However, **R3** (overlapping error and result text in `src/App.tsx` when `!(s < e)`), **R4** (missing CI workflow and ESLint script), and **R6** (`App.tsx` checkbox overriding `room.blocked`) remain as documented low-to-moderate limitations owned by Dias and controlled through manual `npm test`/`npm run build` gates and visual UI checks (`AC6`) before any future merge.
